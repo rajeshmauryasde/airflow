@@ -1,0 +1,33 @@
+package-name: apache-airflow-providers-firebolt
+name: Firebolt
+description: |
+  `Firebolt <https://www.firebolt.com/>`__
+
+versions:
+  - 0.0.9
+
+additional-dependencies:
+  - apache-airflow>=2.1.0
+
+integrations:
+  - integration-name: Firebolt
+    external-doc-url: https://www.firebolt.com/
+    logo: /integration-logos/firebolt/Firebolt.png
+    tags: [software]
+
+operators:
+  - integration-name: Firebolt
+    python-modules:
+      - airflow.providers.firebolt.operators.firebolt
+
+hooks:
+  - integration-name: Firebolt
+    python-modules:
+      - airflow.providers.firebolt.hooks.firebolt
+
+hook-class-names:  # deprecated - to be removed after providers add dependency on Airflow 2.2.0+
+  - airflow.providers.firebolt.hooks.firebolt.FireboltHook
+
+connection-types:
+  - hook-class-name: airflow.providers.firebolt.hooks.firebolt.FireboltHook
+    connection-type: firebolt
