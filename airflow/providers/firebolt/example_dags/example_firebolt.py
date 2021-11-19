@@ -35,8 +35,6 @@ SQL_DROP_DATABASE_STATEMENT=(f"DROP DATABASE IF EXISTS my_db1;")
 SQL_CREATE_TABLE_STATEMENT=(f"CREATE FACT TABLE IF NOT EXISTS users12 (id INT, name String, last_login DateTime, password String) PRIMARY INDEX id;")
 SQL_DROP_TABLE_STATEMENT=(f"DROP TABLE IF EXISTS users12;")
 
-# [START howto_operator_snowflake]
-
 dag = DAG(
     'example_firebolt',
     start_date=datetime(2021, 1, 1),
