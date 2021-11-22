@@ -16,10 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
-from firebolt_db import firebolt_connector
-from firebolt_db.firebolt_connector import Connection
-from typing import Optional, Union
+from firebolt.db import Connection
+from typing import Optional, Union, Any, Dict
 from contextlib import closing
 
 from airflow.hooks.dbapi import DbApiHook
@@ -33,18 +31,46 @@ class FireboltHook(DbApiHook):
     conn_type = 'firebolt'
     hook_name = 'Firebolt'
 
+    @staticmethod
+    def get_connection_form_widgets() -> Dict[str, Any]:
+        """Returns connection widgets to add to connection form"""
+        from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
+        from flask_babel import lazy_gettext
+        from wtforms import StringField
+
+        return {
+            "extra__firebolt__api": StringField(lazy_gettext('Api End Point'), widget=BS3TextFieldWidget()),
+        }
+
+    @staticmethod
+    def get_ui_field_behaviour() -> Dict:
+        """Returns custom field behaviour"""
+
+        return {
+            "hidden_fields": ['port', 'extra'],
+            "relabeling": {'schema': 'Database', 'host': 'Engine URL'},
+            "placeholders": {
+                'host': 'firebolt engine url',
+                'schema': 'firebolt database',
+                'login': 'firebolt userid',
+                'password': 'password',
+                'extra__firebolt__api': 'firebolt api end point',
+            },
+        }
+
     def get_conn(self) -> Connection:
         """Return Firebolt connection object"""
         conn = self.get_connection(self.firebolt_conn_id)
+
         conn_config = {
             "username": conn.login,
             "password": conn.password or '',
-            "db_name": conn.schema,
-            "host": conn.host or 'localhost',
-            "port": conn.port or 8123
+            "database": conn.schema,
+            "engine_url": conn.host or 'localhost',
+            "api_endpoint": conn.extra_dejson.get('extra__firebolt__api', '')
         }
 
-        conn = firebolt_connector.connect(**conn_config)
+        conn = Connection(**conn_config)
         return conn
 
     def run(self, sql: Union[str, list], autocommit: bool = False, parameters: Optional[dict] = None) -> None:
