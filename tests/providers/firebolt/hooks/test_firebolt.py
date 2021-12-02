@@ -1,0 +1,141 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+import unittest
+from unittest import mock
+from unittest.mock import patch
+import json
+from airflow.models import Connection
+from airflow.providers.firebolt.hooks.firebolt import FireboltHook
+
+class TestFireboltHookConn(unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+
+        self.connection = mock.MagicMock()
+        self.connection.login = 'user'
+        self.connection.password = 'pw'
+        self.connection.schema = 'firebolt'
+        self.connection.host = 'engine'
+        self.connection.extra_dejson = {
+            'api_endpoint': 'api.app.firebolt.io'
+        }
+
+        class UnitTestFireboltHook(FireboltHook):
+            conn_name_attr = 'firebolt_conn_id'
+
+        self.db_hook = UnitTestFireboltHook()
+        self.db_hook.get_connection = mock.Mock()
+        self.db_hook.get_connection.return_value = self.connection
+
+    @patch('airflow.providers.firebolt.hooks.firebolt.Connection')
+    def test_get_conn(self, mock_connect):
+        self.db_hook.get_conn()
+        mock_connect.assert_called_once_with(
+            username='user', password="pw", database='firebolt', engine_url='engine', api_endpoint='api.app.firebolt.io'
+        )
+
+    # @mock.patch('airflow.providers.firebolt.hooks.firebolt.Connection')
+    # def test_get_conn(self, mock_connect):
+    #     self.db_hook.get_conn()
+    #     mock_connect.assert_called_once()
+    #     args, kwargs = mock_connect.call_args
+    #     assert args == ()
+    #     assert kwargs['username'] == 'user'
+    #     assert kwargs['password'] == 'pw'
+    #     assert kwargs['database'] == 'firebolt'
+    #     assert kwargs['engine_url'] == 'engine'
+    #
+    # @mock.patch('airflow.providers.firebolt.hooks.firebolt.Connection')
+    # def test_get_conn_extra_args(self, mock_connect):
+    #     self.connection.extra = json.dumps({'api_endpoint': 'api.app.firebolt.io'})
+    #     self.db_hook.get_conn()
+    #     mock_connect.assert_called_once()
+    #     args, kwargs = mock_connect.call_args
+    #     assert args == ()
+    #     assert kwargs['api_endpoint'] == 'api.app.firebolt.io'
+
+
+    # @patch('airflow.providers.firebolt.hooks.firebolt')
+    # def test_get_conn_extra_args(self, mock_connect):
+    #     self.connection.extra = json.dumps({'api_endpoint': 'api.app.firebolt.io'})
+    #     self.db_hook.get_conn()
+    #     mock_connect.assert_called_once_with(
+    #         username='user',password="pw", database='firebolt', engine_url='engine', api_endpoint='api.app.firebolt.io'
+    #     )
+
+
+class TestFireboltHook(unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+
+        self.cur = mock.MagicMock(rowcount=0)
+        self.conn = mock.MagicMock()
+        self.conn.cursor.return_value = self.cur
+
+        conn = self.conn
+        print('step1')
+
+        class UnitTestFireboltHook(FireboltHook):
+            conn_name_attr = 'test_conn_id'
+
+            def get_conn(self):
+                return conn
+
+        self.db_hook = UnitTestFireboltHook()
+
+    @mock.patch('airflow.providers.firebolt.hooks.firebolt.FireboltHook')
+    def test_run_with_parameters(self, mock_hook):
+        sql = "SQL"
+        parameters = ('param1', 'param2')
+        self.db_hook.run(sql=sql, parameters=parameters)
+        self.cur.execute.assert_called_once_with(sql, parameters)
+
+    def test_run_multi_queries(self):
+        sql = ['SQL1', 'SQL2']
+        self.db_hook.run(sql, autocommit=True)
+        for i, item in enumerate(self.conn.execute.call_args_list):
+            args, kwargs = item
+            assert len(args) == 2
+            assert args[0] == sql[i]
+            assert kwargs == {}
+        self.cur.execute.assert_called_with(sql[1])
+
+    @mock.patch('airflow.providers.firebolt.hooks.firebolt.FireboltHook.run')
+    def test_connection_success(self, mock_run):
+        mock_run.return_value = [{'1': 1}]
+        status, msg = self.db_hook.test_connection()
+        assert status is True
+        assert msg == 'Connection successfully tested'
+        print('success')
+
+    @mock.patch(
+        'airflow.providers.firebolt.hooks.firebolt.FireboltHook.run',
+        side_effect=Exception('Connection Errors'),
+    )
+    def test_connection_failure(self, mock_run):
+        mock_run.return_value = [{'1': 1}]
+        status, msg = self.db_hook.test_connection()
+        assert status is False
+        assert msg == 'Connection Errors'
+        print('Fail')
+
+
+if __name__ == "__main__":
+    unittest.main()

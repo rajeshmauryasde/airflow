@@ -67,7 +67,7 @@ class FireboltHook(DbApiHook):
             "password": conn.password or '',
             "database": conn.schema,
             "engine_url": conn.host or 'localhost',
-            "api_endpoint": conn.extra_dejson.get('extra__firebolt__api', '')
+            "api_endpoint": conn.extra_dejson.get('extra__firebolt__api', 'api.app.firebolt.io')
         }
 
         conn = Connection(**conn_config)
@@ -78,7 +78,6 @@ class FireboltHook(DbApiHook):
         Runs a command or a list of commands. Pass a list of sql
         statements to the sql parameter to get them to execute
         sequentially
-
         :param sql: the sql statement to be executed (str) or a list of
             sql statements to execute
         :type sql: str or list
