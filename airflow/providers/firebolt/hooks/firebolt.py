@@ -69,8 +69,16 @@ class FireboltHook(DbApiHook):
             "engine_url": conn.host or 'localhost',
             "api_endpoint": conn.extra_dejson.get('extra__firebolt__api', '')
         }
-
+        '''
+        conn = Connection(username = "aapurva@sigmoidanalytics.com",
+            password = "Apurva111",
+            database = "Sigmoid_Alchemy",
+            engine_url = "https://sigmoid-alchemy-ingest.sigmoidanalytics.us-east-1.app.firebolt.io",
+            api_endpoint = "api.app.firebolt.io")
+        '''
+        print(conn_config)
         conn = Connection(**conn_config)
+        # conn = firebolt_connector.connect(**conn_config)
         return conn
 
     def run(self, sql: Union[str, list], autocommit: bool = False, parameters: Optional[dict] = None) -> None:
