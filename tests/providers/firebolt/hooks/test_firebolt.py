@@ -20,8 +20,6 @@
 import unittest
 from unittest import mock
 from unittest.mock import patch
-import json
-from airflow.models import Connection
 from airflow.providers.firebolt.hooks.firebolt import FireboltHook
 
 class TestFireboltHookConn(unittest.TestCase):
@@ -34,7 +32,7 @@ class TestFireboltHookConn(unittest.TestCase):
         self.connection.schema = 'firebolt'
         self.connection.host = 'engine'
         self.connection.extra_dejson = {
-            'api_endpoint': 'api.app.firebolt.io'
+            'api_endpoint': ''
         }
 
         class UnitTestFireboltHook(FireboltHook):
@@ -44,41 +42,13 @@ class TestFireboltHookConn(unittest.TestCase):
         self.db_hook.get_connection = mock.Mock()
         self.db_hook.get_connection.return_value = self.connection
 
-    @patch('airflow.providers.firebolt.hooks.firebolt.Connection')
+    @patch('airflow.providers.firebolt.hooks.firebolt.connect')
     def test_get_conn(self, mock_connect):
         self.db_hook.get_conn()
+
         mock_connect.assert_called_once_with(
-            username='user', password="pw", database='firebolt', engine_url='engine', api_endpoint='api.app.firebolt.io'
+            username='user', password="pw", database='firebolt', engine_name='engine'
         )
-
-    # @mock.patch('airflow.providers.firebolt.hooks.firebolt.Connection')
-    # def test_get_conn(self, mock_connect):
-    #     self.db_hook.get_conn()
-    #     mock_connect.assert_called_once()
-    #     args, kwargs = mock_connect.call_args
-    #     assert args == ()
-    #     assert kwargs['username'] == 'user'
-    #     assert kwargs['password'] == 'pw'
-    #     assert kwargs['database'] == 'firebolt'
-    #     assert kwargs['engine_url'] == 'engine'
-    #
-    # @mock.patch('airflow.providers.firebolt.hooks.firebolt.Connection')
-    # def test_get_conn_extra_args(self, mock_connect):
-    #     self.connection.extra = json.dumps({'api_endpoint': 'api.app.firebolt.io'})
-    #     self.db_hook.get_conn()
-    #     mock_connect.assert_called_once()
-    #     args, kwargs = mock_connect.call_args
-    #     assert args == ()
-    #     assert kwargs['api_endpoint'] == 'api.app.firebolt.io'
-
-
-    # @patch('airflow.providers.firebolt.hooks.firebolt')
-    # def test_get_conn_extra_args(self, mock_connect):
-    #     self.connection.extra = json.dumps({'api_endpoint': 'api.app.firebolt.io'})
-    #     self.db_hook.get_conn()
-    #     mock_connect.assert_called_once_with(
-    #         username='user',password="pw", database='firebolt', engine_url='engine', api_endpoint='api.app.firebolt.io'
-    #     )
 
 
 class TestFireboltHook(unittest.TestCase):

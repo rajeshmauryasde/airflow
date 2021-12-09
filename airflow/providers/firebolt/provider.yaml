@@ -1,17 +1,17 @@
 package-name: apache-airflow-providers-firebolt
 name: Firebolt
 description: |
-  `Firebolt <https://www.firebolt.com/>`__
+  `Firebolt <https://docs.firebolt.io/>`__
 
 versions:
-  - 0.0.9
+  - 0.0.1
 
 additional-dependencies:
   - apache-airflow>=2.1.0
 
 integrations:
   - integration-name: Firebolt
-    external-doc-url: https://www.firebolt.com/
+    external-doc-url: https://docs.firebolt.io/
     logo: /integration-logos/firebolt/Firebolt.png
     tags: [software]
 
