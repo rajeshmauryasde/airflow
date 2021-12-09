@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from firebolt.db import Connection
+from firebolt.db import Connection, connect
 from typing import Optional, Union, Any, Dict
 from contextlib import closing
 
@@ -39,7 +39,7 @@ class FireboltHook(DbApiHook):
         from wtforms import StringField
 
         return {
-            "extra__firebolt__api": StringField(lazy_gettext('Api End Point'), widget=BS3TextFieldWidget()),
+            "extra__firebolt__api__endpoint": StringField(lazy_gettext('API End Point'), widget=BS3TextFieldWidget()),
         }
 
     @staticmethod
@@ -48,13 +48,13 @@ class FireboltHook(DbApiHook):
 
         return {
             "hidden_fields": ['port', 'extra'],
-            "relabeling": {'schema': 'Database', 'host': 'Engine URL'},
+            "relabeling": {'schema': 'Database', 'host': 'Engine Name'},
             "placeholders": {
-                'host': 'firebolt engine url',
+                'host': 'firebolt engine name',
                 'schema': 'firebolt database',
                 'login': 'firebolt userid',
                 'password': 'password',
-                'extra__firebolt__api': 'firebolt api end point',
+                'extra__firebolt__api__endpoint': 'firebolt api end point',
             },
         }
 
@@ -66,11 +66,14 @@ class FireboltHook(DbApiHook):
             "username": conn.login,
             "password": conn.password or '',
             "database": conn.schema,
-            "engine_url": conn.host or 'localhost',
-            "api_endpoint": conn.extra_dejson.get('extra__firebolt__api', 'api.app.firebolt.io')
+            "engine_name": conn.host,
+            "api_endpoint": conn.extra_dejson.get('extra__firebolt__api__endpoint', ''),
         }
 
-        conn = Connection(**conn_config)
+        if conn_config["api_endpoint"] == '':
+            conn_config.pop("api_endpoint", None)
+
+        conn = connect(**conn_config)
         return conn
 
     def run(self, sql: Union[str, list], autocommit: bool = False, parameters: Optional[dict] = None) -> None:
