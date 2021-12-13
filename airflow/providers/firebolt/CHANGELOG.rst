@@ -64,5 +64,3 @@ Updated documentation and readme files.
 .....
 
 Initial version of the provider.
-
-

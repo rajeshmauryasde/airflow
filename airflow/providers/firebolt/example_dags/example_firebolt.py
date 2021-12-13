@@ -25,15 +25,17 @@ from airflow.providers.firebolt.operators.firebolt import FireboltOperator
 
 FIREBOLT_CONN_ID = 'firebolt_conn_id'
 FIREBOLT_SAMPLE_TABLE = 'order_details'
+FIREBOLT_DATABASE = "Sigmoid_Alchemy"
+FIREBOLT_ENGINE = "Sigmoid_Alchemy_Ingest"
 
 # SQL commands
-CREATE_TABLE_SQL_STRING=(f"SELECT * FROM {FIREBOLT_SAMPLE_TABLE} LIMIT 1;")
-SQL_INSERT_STATEMENT=(f"INSERT INTO {FIREBOLT_SAMPLE_TABLE} values (92,'Oil - Shortening - All - Purpose',6928105225,5,4784.12,'2019-06-05','2019-06-05 04:02:08',1);")
-SQL_LIST=[f"SELECT * FROM {FIREBOLT_SAMPLE_TABLE} LIMIT 2;"]
-SQL_CREATE_DATABASE_STATEMENT=(f"CREATE DATABASE IF NOT EXISTS my_db1;")
-SQL_DROP_DATABASE_STATEMENT=(f"DROP DATABASE IF EXISTS my_db1;")
-SQL_CREATE_TABLE_STATEMENT=(f"CREATE FACT TABLE IF NOT EXISTS users12 (id INT, name String, last_login DateTime, password String) PRIMARY INDEX id;")
-SQL_DROP_TABLE_STATEMENT=(f"DROP TABLE IF EXISTS users12;")
+CREATE_TABLE_SQL_STRING = f"SELECT * FROM {FIREBOLT_SAMPLE_TABLE} LIMIT 1;"
+SQL_INSERT_STATEMENT = f"INSERT INTO {FIREBOLT_SAMPLE_TABLE} values (92,'Oil - Shortening - All - Purpose',6928105225,5,4784.12,'2019-06-05','2019-06-05 04:02:08',1);"
+SQL_LIST = [f"SELECT * FROM {FIREBOLT_SAMPLE_TABLE} LIMIT 2;", "select * from lineitem limit 1;"]
+SQL_CREATE_DATABASE_STATEMENT = f"CREATE DATABASE IF NOT EXISTS my_db1;"
+SQL_DROP_DATABASE_STATEMENT = f"DROP DATABASE IF EXISTS my_db1;"
+SQL_CREATE_TABLE_STATEMENT = f"CREATE FACT TABLE IF NOT EXISTS users12 (id INT, name String, last_login DateTime, password String) PRIMARY INDEX id;"
+SQL_DROP_TABLE_STATEMENT = f"DROP TABLE IF EXISTS users12;"
 
 dag = DAG(
     'example_firebolt',
@@ -47,6 +49,8 @@ dag = DAG(
 firebolt_op_sql_str = FireboltOperator(
     task_id='firebolt_op_sql_str',
     dag=dag,
+    database=FIREBOLT_DATABASE,
+    engine_name=FIREBOLT_ENGINE,
     sql=CREATE_TABLE_SQL_STRING,
 )
 
