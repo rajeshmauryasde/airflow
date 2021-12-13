@@ -87,6 +87,20 @@ class TestFireboltHook(unittest.TestCase):
             assert kwargs == {}
         self.cur.execute.assert_called_with(sql[1])
 
+    def test_get_ui_field_behaviour(self):
+        widget = {
+            "hidden_fields": ['port', 'extra'],
+            "relabeling": {'schema': 'Database', 'host': 'API End Point'},
+            "placeholders": {
+                                'host': 'firebolt api end point',
+                                'schema': 'firebolt database',
+                                'login': 'firebolt userid',
+                                'password': 'password',
+                                'extra__firebolt__engine__name': 'firebolt engine name',
+                        },
+        }
+        self.db_hook.get_ui_field_behaviour() == widget
+
     @mock.patch('airflow.providers.firebolt.hooks.firebolt.FireboltHook.run')
     def test_connection_success(self, mock_run):
         mock_run.return_value = [{'1': 1}]
