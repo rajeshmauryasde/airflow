@@ -20,20 +20,19 @@
 import unittest
 from unittest import mock
 from unittest.mock import patch
+
 from airflow.providers.firebolt.hooks.firebolt import FireboltHook
+
 
 class TestFireboltHookConn(unittest.TestCase):
     def setUp(self):
         super().setUp()
-
         self.connection = mock.MagicMock()
         self.connection.login = 'user'
         self.connection.password = 'pw'
         self.connection.schema = 'firebolt'
-        self.connection.host = 'engine'
-        self.connection.extra_dejson = {
-            'api_endpoint': ''
-        }
+        self.connection.host = 'api_endpoint'
+        self.connection.extra_dejson = {'engine_name': ''}
 
         class UnitTestFireboltHook(FireboltHook):
             conn_name_attr = 'firebolt_conn_id'
@@ -45,22 +44,18 @@ class TestFireboltHookConn(unittest.TestCase):
     @patch('airflow.providers.firebolt.hooks.firebolt.connect')
     def test_get_conn(self, mock_connect):
         self.db_hook.get_conn()
-
         mock_connect.assert_called_once_with(
-            username='user', password="pw", api_endpoint='engine', database='firebolt', engine_name=''
+            username='user', password="pw", api_endpoint='api_endpoint', database='firebolt', engine_name=''
         )
 
 
 class TestFireboltHook(unittest.TestCase):
     def setUp(self):
         super().setUp()
-
         self.cur = mock.MagicMock(rowcount=0)
         self.conn = mock.MagicMock()
         self.conn.cursor.return_value = self.cur
-
         conn = self.conn
-        print('step1')
 
         class UnitTestFireboltHook(FireboltHook):
             conn_name_attr = 'test_conn_id'
@@ -92,12 +87,12 @@ class TestFireboltHook(unittest.TestCase):
             "hidden_fields": ['port', 'extra'],
             "relabeling": {'schema': 'Database', 'host': 'API End Point'},
             "placeholders": {
-                                'host': 'firebolt api end point',
-                                'schema': 'firebolt database',
-                                'login': 'firebolt userid',
-                                'password': 'password',
-                                'extra__firebolt__engine__name': 'firebolt engine name',
-                        },
+                'host': 'firebolt api end point',
+                'schema': 'firebolt database',
+                'login': 'firebolt userid',
+                'password': 'password',
+                'extra__firebolt__engine__name': 'firebolt engine name',
+            },
         }
         self.db_hook.get_ui_field_behaviour() == widget
 
@@ -107,7 +102,6 @@ class TestFireboltHook(unittest.TestCase):
         status, msg = self.db_hook.test_connection()
         assert status is True
         assert msg == 'Connection successfully tested'
-        print('success')
 
     @mock.patch(
         'airflow.providers.firebolt.hooks.firebolt.FireboltHook.run',
@@ -118,8 +112,3 @@ class TestFireboltHook(unittest.TestCase):
         status, msg = self.db_hook.test_connection()
         assert status is False
         assert msg == 'Connection Errors'
-        print('Fail')
-
-
-if __name__ == "__main__":
-    unittest.main()

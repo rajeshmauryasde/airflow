@@ -21,6 +21,9 @@ from typing import Any, Dict, Optional, Union
 
 from firebolt.client import DEFAULT_API_URL
 from firebolt.db import Connection, connect
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
+from flask_babel import lazy_gettext
+from wtforms import StringField
 
 from airflow.hooks.dbapi import DbApiHook
 
@@ -50,10 +53,6 @@ class FireboltHook(DbApiHook):
     @staticmethod
     def get_connection_form_widgets() -> Dict[str, Any]:
         """Returns connection widgets to add to connection form"""
-        from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
-        from flask_babel import lazy_gettext
-        from wtforms import StringField
-
         return {
             "extra__firebolt__engine__name": StringField(
                 lazy_gettext('Engine Name'), widget=BS3TextFieldWidget()
@@ -76,6 +75,7 @@ class FireboltHook(DbApiHook):
         }
 
     def __init__(self, *args, **kwargs) -> None:
+        """Firebolthook Constructor"""
         super().__init__(*args, **kwargs)
         self.database = kwargs.pop("database", None)
         self.engine_name = kwargs.pop("engine_name", None)
@@ -86,12 +86,10 @@ class FireboltHook(DbApiHook):
         used in get_uri() and get_connection()
         """
         conn = self.get_connection(self.firebolt_conn_id)  # type: ignore[attr-defined]
-
         database = conn.schema
         engine_name = conn.extra_dejson.get('extra__firebolt__engine__name', '') or conn.extra_dejson.get(
             'engine_name', ''
         )
-
         conn_config = {
             "username": conn.login,
             "password": conn.password or '',
@@ -99,7 +97,6 @@ class FireboltHook(DbApiHook):
             "database": self.database or database,
             "engine_name": self.engine_name or engine_name,
         }
-
         return conn_config
 
     def get_conn(self) -> Connection:
@@ -108,7 +105,7 @@ class FireboltHook(DbApiHook):
         conn = connect(**conn_config)
         return conn
 
-    def run(self, sql: Union[str, list], autocommit: bool = False, parameters: Optional[dict] = None) -> None:
+    def run(self, sql: Union[str, list], autocommit: bool = False, parameters: Optional[dict] = None):
         """
         Runs a command or a list of commands. Pass a list of sql
         statements to the sql parameter to get them to execute
@@ -125,25 +122,20 @@ class FireboltHook(DbApiHook):
         scalar = isinstance(sql, str)
         if scalar:
             sql = [sql]
-
         with closing(self.get_conn()) as conn:
             for query in sql:
                 self.log.info(query)
                 with closing(conn.cursor()) as cursor:
                     for sql_statement in sql:
-                        self.log.info(f"Running statement: {sql_statement}, parameter: {parameters}")
                         if parameters:
                             cursor.execute(sql_statement, parameters)
                         else:
                             cursor.execute(sql_statement)
-
                         execution_info = []
-                        for row in cursor:
-                            self.log.info(f"Statement execution info - {row}")
-                            execution_info.append(row)
-
+                        if cursor.rowcount > 0:
+                            for row in cursor:
+                                execution_info.append(row)
                         self.log.info(f"Rows affected: {cursor.rowcount}")
-
         return execution_info
 
     def test_connection(self):

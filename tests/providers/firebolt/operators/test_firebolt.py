@@ -28,10 +28,10 @@ class TestFireboltOperator(unittest.TestCase):
         sql = "SELECT 1"
         autocommit = True
         parameters = {'value': 1}
-        operator = FireboltOperator(task_id='test_task_id', sql=sql, autocommit=autocommit, parameters=parameters)
+        operator = FireboltOperator(
+            task_id='test_task_id', sql=sql, autocommit=autocommit, parameters=parameters
+        )
         operator.execute({})
-        mock_hook.return_value.run.assert_called_once_with(sql=sql, autocommit=autocommit, parameters=parameters)
-
-
-if __name__ == "__main__":
-    unittest.main()
+        mock_hook.return_value.run.assert_called_once_with(
+            sql=sql, autocommit=autocommit, parameters=parameters
+        )
