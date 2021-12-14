@@ -18,7 +18,7 @@
 ---
 package-name: apache-airflow-providers-firebolt
 name: Firebolt
-description: |
+description:
   `Firebolt <https://docs.firebolt.io/>`__
 
 versions:

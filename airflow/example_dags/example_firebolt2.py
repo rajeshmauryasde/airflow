@@ -25,28 +25,33 @@ from airflow.providers.firebolt.operators.firebolt import FireboltOperator
 
 FIREBOLT_CONN_ID = 'firebolt_conn_id'
 FIREBOLT_SAMPLE_TABLE = 'order_details'
-FIREBOLT_DATABASE = 'Sigmoid_Alchemy'
-FIREBOLT_ENGINE = 'Sigmoid_Alchemy_Ingest'
 
 # SQL commands
-CREATE_TABLE_SQL_STRING = f"SELECT * FROM {FIREBOLT_SAMPLE_TABLE} LIMIT 1;"
-SQL_INSERT_STATEMENT = (
-    f"INSERT INTO {FIREBOLT_SAMPLE_TABLE} values (92,'Oil - Shortening - All - Purpose',"
-    f"6928105225,5,4784.12,'2019-06-05','2019-06-05 04:02:08',1); "
-)
-SQL_LIST = [f"SELECT * FROM {FIREBOLT_SAMPLE_TABLE} LIMIT 2;", "select * from lineitem limit 1;"]
-SQL_CREATE_DATABASE_STATEMENT = "CREATE DATABASE IF NOT EXISTS my_db1;"
-SQL_DROP_DATABASE_STATEMENT = "DROP DATABASE IF EXISTS my_db1;"
-SQL_CREATE_TABLE_STATEMENT = (
-    "CREATE FACT TABLE IF NOT EXISTS users12 (id INT, name String, last_login DateTime, password String)"
-    " PRIMARY INDEX id;"
-)
-SQL_DROP_TABLE_STATEMENT = "DROP TABLE IF EXISTS users12;"
-=======
 
+
+
+#CREATE_TABLE_SQL_STRING = (
+#    f"CREATE OR REPLACE TRANSIENT TABLE {FIREBOLT_SAMPLE_TABLE} (name VARCHAR(250), id INT);"
+#)
+#SQL_INSERT_STATEMENT = f"INSERT INTO {FIREBOLT_SAMPLE_TABLE} VALUES ('name', %(id)s)"
+#SQL_LIST = [SQL_INSERT_STATEMENT % {"id": n} for n in range(0, 10)]
+#SQL_MULTIPLE_STMTS = "; ".join(SQL_LIST)
+#SNOWFLAKE_SLACK_SQL = f"SELECT name, id FROM {FIREBOLT_SAMPLE_TABLE} LIMIT 10;"
+#SNOWFLAKE_SLACK_MESSAGE = (
+#    "Results in an ASCII table:\n```{{ results_df | tabulate(tablefmt='pretty', headers='keys') }}```"
+#)
+CREATE_TABLE_SQL_STRING=(f"SELECT * FROM {FIREBOLT_SAMPLE_TABLE} LIMIT 1;")
+SQL_INSERT_STATEMENT=(f"INSERT INTO {FIREBOLT_SAMPLE_TABLE} values (91,'Oil - Shortening - All - Purpose',6928105225,5,4784.12,'2019-06-05','2019-06-05 04:02:08',1);")
+SQL_LIST=[f"SELECT * FROM {FIREBOLT_SAMPLE_TABLE} LIMIT 2;"]
+SQL_CREATE_DATABASE_STATEMENT=(f"CREATE DATABASE IF NOT EXISTS my_db1;")
+SQL_DROP_DATABASE_STATEMENT=(f"DROP DATABASE IF EXISTS my_db1;")
+SQL_CREATE_TABLE_STATEMENT=f"CREATE FACT TABLE IF NOT EXISTS users12 (id INTEGER, name String, last_login DateTime, password String) PRIMARY INDEX id"
+SQL_DROP_TABLE_STATEMENT=f"DROP TABLE IF EXISTS users12;"
+
+# [START howto_operator_snowflake]
 
 dag = DAG(
-    'example_firebolt',
+    'example_firebolt2ß',
     start_date=datetime(2021, 1, 1),
     default_args={'firebolt_conn_id': FIREBOLT_CONN_ID},
     tags=['example'],
@@ -57,8 +62,6 @@ dag = DAG(
 firebolt_op_sql_str = FireboltOperator(
     task_id='firebolt_op_sql_str',
     dag=dag,
-    database=FIREBOLT_DATABASE,
-    engine_name=FIREBOLT_ENGINE,
     sql=CREATE_TABLE_SQL_STRING,
 )
 
@@ -70,9 +73,9 @@ firebolt_op_with_params = FireboltOperator(
 )
 
 firebolt_op_sql_list = FireboltOperator(
-    task_id='firebolt_op_sql_list',
-    dag=dag,
-    sql=SQL_LIST,
+   task_id='firebolt_op_sql_list',
+   dag=dag,
+   sql=SQL_LIST,
 )
 
 firebolt_op_sql_create_db = FireboltOperator(

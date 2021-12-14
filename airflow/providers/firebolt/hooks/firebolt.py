@@ -16,12 +16,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+
 from contextlib import closing
 from typing import Any, Dict, Optional, Union
 
 from firebolt.client import DEFAULT_API_URL
 from firebolt.db import Connection, connect
-
 from airflow.hooks.dbapi import DbApiHook
 
 
