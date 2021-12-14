@@ -281,6 +281,9 @@ exasol = ['pyexasol>=0.5.1,<1.0.0', pandas_requirement]
 facebook = [
     'facebook-business>=6.0.2',
 ]
+firebolt = [
+    'firebolt-sdk>=0.2.0',
+]
 flask_appbuilder_authlib = [
     'authlib',
 ]
@@ -589,6 +592,7 @@ PROVIDERS_REQUIREMENTS: Dict[str, List[str]] = {
     'elasticsearch': elasticsearch,
     'exasol': exasol,
     'facebook': facebook,
+    'firebolt': firebolt,
     'ftp': [],
     'google': google,
     'grpc': grpc,

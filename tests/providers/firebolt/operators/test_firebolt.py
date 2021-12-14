@@ -1,3 +1,4 @@
+#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -14,3 +15,22 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
+import unittest
+from unittest import mock
+
+from airflow.providers.firebolt.operators.firebolt import FireboltOperator
+
+
+class TestFireboltOperator(unittest.TestCase):
+    @mock.patch('airflow.providers.firebolt.operators.firebolt.FireboltHook')
+    def test_execute(self, mock_hook):
+        sql = "SELECT 1"
+        autocommit = True
+        parameters = {'value': 1}
+        operator = FireboltOperator(task_id='test_task_id', sql=sql, autocommit=autocommit, parameters=parameters)
+        operator.execute({})
+        mock_hook.return_value.run.assert_called_once_with(sql=sql, autocommit=autocommit, parameters=parameters)
+
+if __name__ == "__main__":
+    unittest.main()
