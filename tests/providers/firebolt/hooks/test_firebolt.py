@@ -50,7 +50,6 @@ class TestFireboltHookConn(unittest.TestCase):
             username='user', password="pw", api_endpoint='engine', database='firebolt', engine_name=''
         )
 
-
 class TestFireboltHook(unittest.TestCase):
     def setUp(self):
         super().setUp()
@@ -72,6 +71,7 @@ class TestFireboltHook(unittest.TestCase):
 
     @mock.patch('airflow.providers.firebolt.hooks.firebolt.FireboltHook')
     def test_run_with_parameters(self, mock_hook):
+
         sql = "SQL"
         parameters = ('param1', 'param2')
         self.db_hook.run(sql=sql, parameters=parameters)
@@ -119,7 +119,6 @@ class TestFireboltHook(unittest.TestCase):
         assert status is False
         assert msg == 'Connection Errors'
         print('Fail')
-
 
 if __name__ == "__main__":
     unittest.main()

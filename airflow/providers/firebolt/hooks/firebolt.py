@@ -99,7 +99,6 @@ class FireboltHook(DbApiHook):
             "database": self.database or database,
             "engine_name": self.engine_name or engine_name,
         }
-
         return conn_config
 
     def get_conn(self) -> Connection:

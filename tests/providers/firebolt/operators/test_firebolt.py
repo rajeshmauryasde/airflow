@@ -32,6 +32,5 @@ class TestFireboltOperator(unittest.TestCase):
         operator.execute({})
         mock_hook.return_value.run.assert_called_once_with(sql=sql, autocommit=autocommit, parameters=parameters)
 
-
 if __name__ == "__main__":
     unittest.main()
