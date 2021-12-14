@@ -26,8 +26,8 @@ class TestFireboltOperator(unittest.TestCase):
     @mock.patch('airflow.providers.firebolt.operators.firebolt.FireboltHook')
     def test_execute(self, mock_hook):
         sql = "SELECT 1"
-        autocommit=True
-        parameters={'value': 1}
+        autocommit = True
+        parameters = {'value': 1}
         operator = FireboltOperator(task_id='test_task_id', sql=sql, autocommit=autocommit, parameters=parameters)
         operator.execute({})
         mock_hook.return_value.run.assert_called_once_with(sql=sql, autocommit=autocommit, parameters=parameters)

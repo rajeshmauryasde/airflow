@@ -20,22 +20,19 @@
 import unittest
 from unittest import mock
 from unittest.mock import patch
-import json
-from airflow.models import Connection
 from airflow.providers.firebolt.hooks.firebolt import FireboltHook
-
 
 class TestFireboltHookConn(unittest.TestCase):
     def setUp(self):
         super().setUp()
 
-        self.connection = connection = mock.MagicMock()
+        self.connection = mock.MagicMock()
         self.connection.login = 'user'
         self.connection.password = 'pw'
         self.connection.schema = 'firebolt'
-        self.connection.host='engine'
+        self.connection.host = 'engine'
         self.connection.extra_dejson = {
-            'api_endpoint':'api_endpoint'
+            'api_endpoint': ''
         }
 
         class UnitTestFireboltHook(FireboltHook):
@@ -45,20 +42,13 @@ class TestFireboltHookConn(unittest.TestCase):
         self.db_hook.get_connection = mock.Mock()
         self.db_hook.get_connection.return_value = self.connection
 
-    @patch('airflow.providers.firebolt.hooks.firebolt.Connection')
+    @patch('airflow.providers.firebolt.hooks.firebolt.connect')
     def test_get_conn(self, mock_connect):
         self.db_hook.get_conn()
-        mock_connect.assert_called_once_with(
-            username='user', password="pw", database='firebolt', engine_url='engine', api_endpoint=''
-        )
 
-    # @patch('airflow.providers.firebolt.hooks.firebolt')
-    # def test_get_conn_extra_args(self, mock_connect):
-    #     self.connection.extra = json.dumps({'api_endpoint': 'api.app.firebolt.io'})
-    #     self.db_hook.get_conn()
-    #     mock_connect.assert_called_once_with(
-    #         username='user',password="pw", database='firebolt', engine_url='engine', api_endpoint='api.app.firebolt.io'
-    #     )
+        mock_connect.assert_called_once_with(
+            username='user', password="pw", api_endpoint='engine', database='firebolt', engine_name=''
+        )
 
 class TestFireboltHook(unittest.TestCase):
     def setUp(self):
@@ -69,7 +59,8 @@ class TestFireboltHook(unittest.TestCase):
         self.conn.cursor.return_value = self.cur
 
         conn = self.conn
-        # print('step1')
+        print('step1')
+
         class UnitTestFireboltHook(FireboltHook):
             conn_name_attr = 'test_conn_id'
 
@@ -79,7 +70,8 @@ class TestFireboltHook(unittest.TestCase):
         self.db_hook = UnitTestFireboltHook()
 
     @mock.patch('airflow.providers.firebolt.hooks.firebolt.FireboltHook')
-    def test_run_with_parameters(self,mock_hook):
+    def test_run_with_parameters(self, mock_hook):
+
         sql = "SQL"
         parameters = ('param1', 'param2')
         self.db_hook.run(sql=sql, parameters=parameters)
@@ -95,24 +87,38 @@ class TestFireboltHook(unittest.TestCase):
             assert kwargs == {}
         self.cur.execute.assert_called_with(sql[1])
 
+    def test_get_ui_field_behaviour(self):
+        widget = {
+            "hidden_fields": ['port', 'extra'],
+            "relabeling": {'schema': 'Database', 'host': 'API End Point'},
+            "placeholders": {
+                                'host': 'firebolt api end point',
+                                'schema': 'firebolt database',
+                                'login': 'firebolt userid',
+                                'password': 'password',
+                                'extra__firebolt__engine__name': 'firebolt engine name',
+                        },
+        }
+        self.db_hook.get_ui_field_behaviour() == widget
+
     @mock.patch('airflow.providers.firebolt.hooks.firebolt.FireboltHook.run')
     def test_connection_success(self, mock_run):
         mock_run.return_value = [{'1': 1}]
         status, msg = self.db_hook.test_connection()
         assert status is True
         assert msg == 'Connection successfully tested'
-        # print('success')
+        print('success')
 
     @mock.patch(
         'airflow.providers.firebolt.hooks.firebolt.FireboltHook.run',
         side_effect=Exception('Connection Errors'),
     )
     def test_connection_failure(self, mock_run):
+        mock_run.return_value = [{'1': 1}]
         status, msg = self.db_hook.test_connection()
         assert status is False
         assert msg == 'Connection Errors'
-        # print('Fail')
-
+        print('Fail')
 
 if __name__ == "__main__":
     unittest.main()
