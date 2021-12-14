@@ -86,6 +86,7 @@ class FireboltOperator(BaseOperator):
         return get_db_hook(self)
 
     def execute(self, context: Dict[Any, Any]) -> None:
+        """Run query on firebolt"""
         self.log.info('Executing: %s', self.sql)
         hook = self.get_db_hook()
         hook.run(sql=self.sql, autocommit=self.autocommit, parameters=self.parameters)

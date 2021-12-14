@@ -55,8 +55,6 @@ dag = DAG(
 firebolt_op_sql_str = FireboltOperator(
     task_id='firebolt_op_sql_str',
     dag=dag,
-    database=FIREBOLT_DATABASE,
-    engine_name=FIREBOLT_ENGINE,
     sql=CREATE_TABLE_SQL_STRING,
 )
 
