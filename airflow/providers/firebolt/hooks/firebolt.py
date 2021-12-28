@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from contextlib import closing
 from typing import Any, Dict, Optional, Union, List
 
 from firebolt.client import DEFAULT_API_URL
@@ -121,10 +122,9 @@ class FireboltHook(DbApiHook):
         scalar = isinstance(sql, str)
         if scalar:
             sql = [sql]
-        with self.get_conn() as conn:
-            with conn.cursor() as cursor:
+        with closing(self.get_conn()) as conn:
+            with closing(conn.cursor()) as cursor:
                 for sql_statement in sql:
-                    self.log.info(f"Running statement: {sql_statement}, parameters: {parameters}")
                     if parameters:
                         cursor.execute(sql_statement, parameters)
                     else:

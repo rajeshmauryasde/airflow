@@ -75,9 +75,9 @@ class TestFireboltHook(unittest.TestCase):
     def test_run_multi_queries(self):
         sql = ['SQL1', 'SQL2']
         self.db_hook.run(sql, autocommit=True)
-        for i, item in enumerate(self.conn.execute.call_args_list):
+        for i, item in enumerate(self.cur.execute.call_args_list):
             args, kwargs = item
-            assert len(args) == 2
+            assert len(args) == 1
             assert args[0] == sql[i]
             assert kwargs == {}
         self.cur.execute.assert_called_with(sql[1])
