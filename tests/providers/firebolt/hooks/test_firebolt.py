@@ -45,7 +45,11 @@ class TestFireboltHookConn(unittest.TestCase):
     def test_get_conn(self, mock_connect):
         self.db_hook.get_conn()
         mock_connect.assert_called_once_with(
-            username='user', password="pw", api_endpoint='api_endpoint', database='firebolt', engine_name='test'
+            username='user',
+            password="pw",
+            api_endpoint='api_endpoint',
+            database='firebolt',
+            engine_name='test',
         )
 
 

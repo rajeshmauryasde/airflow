@@ -17,13 +17,14 @@
 # under the License.
 #
 from contextlib import closing
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, List, Optional, Union
 
 from firebolt.client import DEFAULT_API_URL
 from firebolt.db import Connection, connect
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
 from flask_babel import lazy_gettext
 from wtforms import StringField
+
 from airflow.hooks.dbapi import DbApiHook
 
 
