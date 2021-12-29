@@ -50,7 +50,7 @@ with DAG(
     tags=['example'],
     catchup=False,
 ) as dag:
-
+    
     firebolt_op_sql_str = FireboltOperator(
         task_id='firebolt_op_sql_str',
         sql=SELECT_STATEMENT_SQL_STRING,
