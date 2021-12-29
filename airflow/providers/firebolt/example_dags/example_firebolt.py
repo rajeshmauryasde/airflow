@@ -43,66 +43,49 @@ SQL_CREATE_TABLE_STATEMENT = (
 )
 SQL_DROP_TABLE_STATEMENT = "DROP TABLE IF EXISTS users12;"
 
-dag = DAG(
+with DAG(
     'example_firebolt',
     start_date=datetime(2021, 1, 1),
     default_args={'firebolt_conn_id': FIREBOLT_CONN_ID},
     tags=['example'],
     catchup=False,
-)
+) as dag:
 
+    firebolt_op_sql_str = FireboltOperator(
+        task_id='firebolt_op_sql_str',
+        sql=SELECT_STATEMENT_SQL_STRING,
+    )
 
-firebolt_op_sql_str = FireboltOperator(
-    task_id='firebolt_op_sql_str',
-    dag=dag,
-    sql=SELECT_STATEMENT_SQL_STRING,
-)
+    firebolt_op_with_params = FireboltOperator(
+        task_id='firebolt_op_with_params',
+        sql=SQL_INSERT_STATEMENT,
+        parameters={"id": 56},
+    )
 
-firebolt_op_with_params = FireboltOperator(
-    task_id='firebolt_op_with_params',
-    dag=dag,
-    sql=SQL_INSERT_STATEMENT,
-    parameters={"id": 56},
-)
+    firebolt_op_sql_list = FireboltOperator(
+        task_id='firebolt_op_sql_list',
+        sql=SQL_LIST,
+    )
 
-firebolt_op_sql_list = FireboltOperator(
-    task_id='firebolt_op_sql_list',
-    dag=dag,
-    sql=SQL_LIST,
-)
+    firebolt_op_sql_create_db = FireboltOperator(
+        task_id='firebolt_op_sql_create_db',
+        sql=SQL_CREATE_DATABASE_STATEMENT,
+    )
 
-firebolt_op_sql_create_db = FireboltOperator(
-    task_id='firebolt_op_sql_create_db',
-    dag=dag,
-    sql=SQL_CREATE_DATABASE_STATEMENT,
-)
+    firebolt_op_sql_drop_db = FireboltOperator(
+        task_id='firebolt_op_sql_drop_db',
+        sql=SQL_DROP_DATABASE_STATEMENT,
+    )
 
-firebolt_op_sql_drop_db = FireboltOperator(
-    task_id='firebolt_op_sql_drop_db',
-    dag=dag,
-    sql=SQL_DROP_DATABASE_STATEMENT,
-)
+    firebolt_op_sql_create_table = FireboltOperator(
+        task_id='firebolt_op_sql_create_table',
+        sql=SQL_CREATE_TABLE_STATEMENT,
+    )
 
-firebolt_op_sql_create_table = FireboltOperator(
-    task_id='firebolt_op_sql_create_table',
-    dag=dag,
-    sql=SQL_CREATE_TABLE_STATEMENT,
-)
+    firebolt_op_sql_drop_table = FireboltOperator(
+        task_id='firebolt_op_sql_drop_table',
+        sql=SQL_DROP_TABLE_STATEMENT,
+    )
 
-firebolt_op_sql_drop_table = FireboltOperator(
-    task_id='firebolt_op_sql_drop_table',
-    dag=dag,
-    sql=SQL_DROP_TABLE_STATEMENT,
-)
-
-(
-    firebolt_op_sql_str
-    >> [
-        firebolt_op_with_params,
-        firebolt_op_sql_list,
-        firebolt_op_sql_create_db,
-        firebolt_op_sql_drop_db,
-        firebolt_op_sql_create_table,
-        firebolt_op_sql_drop_table,
-    ]
-)
+    firebolt_op_sql_str >> firebolt_op_with_params >> firebolt_op_sql_list >> firebolt_op_sql_create_db >> \
+        firebolt_op_sql_drop_db >> firebolt_op_sql_create_table >> firebolt_op_sql_drop_table
