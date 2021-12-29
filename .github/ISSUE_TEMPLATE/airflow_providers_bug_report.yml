@@ -50,6 +50,7 @@ body:
         - elasticsearch
         - exasol
         - facebook
+        - firebolt
         - ftp
         - google
         - grpc
